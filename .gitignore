@@ -1,0 +1,13 @@
+# Ignore IDE files
+.idea/
+.vscode/
+target/
+*.class
+
+# Ignore environment variables
+application.properties
+
+# Ignore logs
+logs/
+*.log
+
