@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 @Repository
-public interface UserRepo extends JpaRepository<User,Long> {
-	Optional<User> findByEmail(String email);
+public interface UserRepo extends JpaRepository<User, Long> {
+    Optional<User> findByEmailIgnoreCase(String email);
+    Optional<User> findByUsernameIgnoreCase(String username); // 🔥 Ensure case-insensitive search
 }

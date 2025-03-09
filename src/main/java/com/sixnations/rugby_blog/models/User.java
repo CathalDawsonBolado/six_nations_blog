@@ -22,16 +22,7 @@ public class User {
 	public enum Role {
 		USER, ADMIN
 	}
-	
-	public User() {
-		
-	}
-	public User(String username, String email, String password, Role role) {
-		this.username = username;
-		this.email = email;
-		this.password = password;
-		this.role = role;
-	}
+	private boolean suspended = false;
 	public Long getId() {
 		return id;
 	}
@@ -62,5 +53,10 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-	
+	public boolean isSuspended() {
+		return suspended;
+	}
+	public void setSuspended(boolean suspended) {
+		this.suspended = suspended;
+	}
 }
