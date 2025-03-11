@@ -1,19 +1,18 @@
 package com.sixnations.rugby_blog.controller;
 
-import com.sixnations.rugby_blog.dao.UserRepo;
 import com.sixnations.rugby_blog.models.Post;
 import com.sixnations.rugby_blog.models.User;
-import com.sixnations.rugby_blog.security.JwtService;
 import com.sixnations.rugby_blog.services.PostService;
-import io.jsonwebtoken.Claims;
+import com.sixnations.rugby_blog.services.UserService;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.nio.file.AccessDeniedException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,16 +23,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RequestMapping("/api/posts")
 public class PostController {
     private final PostService postService;
-    private final JwtService jwtService;
-    private final UserRepo userRepo;
+    private final UserService userService;
 
-    public PostController(PostService postService, JwtService jwtService, UserRepo userRepo) {
+    public PostController(PostService postService, UserService userService) {
         this.postService = postService;
-        this.jwtService = jwtService;
-        this.userRepo = userRepo;
+        this.userService = userService;
     }
 
-    // ✅ Get All Posts (HATEOAS)
+    // ✅ Get All Posts
     @GetMapping
     public CollectionModel<EntityModel<Post>> getAllPosts() {
         List<EntityModel<Post>> posts = postService.getAllPosts().stream()
@@ -45,7 +42,7 @@ public class PostController {
         return CollectionModel.of(posts, linkTo(methodOn(PostController.class).getAllPosts()).withSelfRel());
     }
 
-    // ✅ Get a specific post by ID (HATEOAS)
+    // ✅ Get Post by ID
     @GetMapping("/{postId}")
     public ResponseEntity<EntityModel<Post>> getPostById(@PathVariable Long postId) {
         Optional<Post> postOpt = postService.getPostById(postId);
@@ -60,76 +57,37 @@ public class PostController {
         return ResponseEntity.ok(postResource);
     }
 
-    // ✅ Create a Post (HATEOAS)
+    // ✅ Search Posts
+    @GetMapping("/search")
+    public ResponseEntity<List<Post>> searchPosts(@RequestParam("query") String query) {
+        List<Post> posts = postService.searchPosts(query);
+        return ResponseEntity.ok(posts);
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<?> createPost(@RequestBody Post post, HttpServletRequest request) {
-        try {
-            if (post.getTitle() == null || post.getTitle().trim().isEmpty()) {
-                return ResponseEntity.status(400).body("Title is required!");
-            }
-            if (post.getContent() == null || post.getContent().trim().isEmpty()) {
-                return ResponseEntity.status(400).body("Content is required!");
-            }
-
-            String identifier = extractUsernameFromToken(request);
-            if (identifier == null) return ResponseEntity.status(401).body("Unauthorized: Missing or invalid token");
-
-            User user = getUserByIdentifier(identifier);
-            if (user == null) return ResponseEntity.status(404).body("User not found!");
-
-            post.setUser(user);
-            Post savedPost = postService.createPost(post);
-
-            EntityModel<Post> postResource = EntityModel.of(savedPost,
-                    linkTo(methodOn(PostController.class).getPostById(savedPost.getId())).withSelfRel(),
-                    linkTo(methodOn(PostController.class).getAllPosts()).withRel("all-posts")
-            );
-
-            return ResponseEntity.ok(postResource);
-
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(403).body("Forbidden: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Post> createPost(@RequestBody Post post, Principal principal) {
+        if (principal == null) {
+            System.out.println("❌ ERROR: Principal is NULL - User might not be authenticated");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
-    }
 
-    // ✅ Delete a Post (HATEOAS)
-    @DeleteMapping("/delete/{postId}")
-    public ResponseEntity<?> deletePost(@PathVariable Long postId, HttpServletRequest request) {
-        try {
-            String username = extractUsernameFromToken(request);
-            if (username == null) return ResponseEntity.status(401).body("Unauthorized");
-
-            boolean deleted = postService.deletePost(postId, username);
-            if (!deleted) return ResponseEntity.status(404).body("Post not found.");
-
-            return ResponseEntity.ok().body("Post deleted successfully.");
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(403).body("Forbidden: " + e.getMessage());
+        // ✅ Fetch the logged-in user from the database
+        Optional<User> optionalUser = userService.findByUsername(principal.getName());
+        if (optionalUser.isEmpty()) {
+            System.out.println("❌ ERROR: User not found for username: " + principal.getName());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
         }
+
+        // ✅ Assign the user to the post before saving
+        User user = optionalUser.get();
+        post.setUser(user);
+        System.out.println("✅ User: " + user.getUsername() + " is creating a post");
+
+        Post savedPost = postService.createPost(post);
+        return ResponseEntity.ok(savedPost);
     }
 
-    private String extractUsernameFromToken(HttpServletRequest request) {
-        try {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
-            return jwtService.extractUsername(authHeader.substring(7));
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
-    private User getUserByIdentifier(String identifier) throws AccessDeniedException {
-        Optional<User> userOpt = identifier.contains("@") ?
-                userRepo.findByEmailIgnoreCase(identifier) :
-                userRepo.findByUsernameIgnoreCase(identifier);
-        
-        return userOpt.orElseThrow(() -> new IllegalArgumentException("User not found: " + identifier));
-    }
+
 }
-
-
-
-
-

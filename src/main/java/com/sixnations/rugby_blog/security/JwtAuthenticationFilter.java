@@ -5,12 +5,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -27,46 +31,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // ✅ Extract Token from Header
         String token = request.getHeader("Authorization");
-        System.out.println("📢 Extracted Token from Request: " + token);
-
         if (token == null || !token.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ✅ Remove "Bearer " prefix
         token = token.substring(7);
-
         try {
-            // ✅ Extract Username from Token
             String username = jwtService.extractUsername(token);
-            System.out.println("🔍 Extracted Username: " + username);
-
-            // ✅ Ensure User is not already authenticated
+            List<String> roles = jwtService.extractUserRoles(token); // ✅ Extract roles properly
+            
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // ✅ Load User from Database
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // ✅ Validate Token
                 if (jwtService.isTokenValid(token, userDetails)) {
+                    // 🚨 FIX: Convert roles properly into SimpleGrantedAuthority
+                	List<SimpleGrantedAuthority> authorities = roles.stream()
+                		    .map(role -> new SimpleGrantedAuthority(role.replace("ROLE_", ""))) // ✅ FIX: Remove "ROLE_"
+                		    .collect(Collectors.toList());
+
+                		System.out.println("✅ Final Spring Security Authorities: " + authorities);
+
+
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
+                            new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("✅ User Authenticated: " + username);
                 }
             }
-
         } catch (Exception e) {
             System.out.println("❌ JWT Validation Failed: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
+
 }
 

@@ -4,12 +4,11 @@ import com.sixnations.rugby_blog.models.Post;
 import com.sixnations.rugby_blog.models.User;
 import com.sixnations.rugby_blog.dao.PostRepo;
 import com.sixnations.rugby_blog.dao.UserRepo;
+import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class PostService {
@@ -29,6 +28,11 @@ public class PostService {
     // ✅ Get a specific post by ID
     public Optional<Post> getPostById(Long postId) {
         return postRepo.findById(postId);
+    }
+
+    // ✅ Search posts by title or content
+    public List<Post> searchPosts(String query) {
+        return postRepo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(query, query);
     }
 
     // ✅ Get all posts by a specific user
@@ -95,6 +99,6 @@ public class PostService {
 
         return userOpt.orElseThrow(() -> new IllegalArgumentException("User not found: " + identifier));
     }
-
-    
 }
+
+

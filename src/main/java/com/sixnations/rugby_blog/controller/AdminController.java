@@ -2,6 +2,9 @@ package com.sixnations.rugby_blog.controller;
 
 import com.sixnations.rugby_blog.models.User;
 import com.sixnations.rugby_blog.services.UserService;
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,13 @@ public class AdminController {
         }
         return ResponseEntity.badRequest().body("User not found or already an Admin.");
     }
+ // ✅ Get All Users (Admin Only)
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
 
     // ✅ Suspend User
     @PutMapping("/suspend/{userId}")

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rugby Blog - Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    <div id="authSection">
+        <div class="auth-container">
+            <img src="/images/SixNationsTrophy.PNG" class="trophy left" alt="Six Nations Trophy">
+
+            <div id="loginPage" class="auth-box">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginIdentifier">Username or Email</label>
+                        <input type="text" id="loginIdentifier" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                <p><a href="#" id="showRegister">Create an account</a></p>
+            </div>
+
+            <div id="registerPage" class="auth-box hidden">
+                <h2>Register</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="regUsername">Username</label>
+                        <input type="text" id="regUsername" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email</label>
+                        <input type="email" id="regEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <input type="password" id="regPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                </form>
+                <p><a href="#" id="showLogin">Already have an account? Login</a></p>
+            </div>
+
+            <img src="/images/TripleCrown.PNG" class="trophy right" alt="Triple Crown Trophy">
+        </div>
+    </div>
+
+    <div id="dashboardSection" class="hidden">
+        <nav class="navbar">
+            <button id="loadUserDashboard">User Dashboard</button>
+            <button id="loadAdminDashboard">Admin Dashboard</button>
+            <button id="logoutBtn">Logout</button>
+        </nav>
+
+        <div id="content">
+            <h2>Welcome to the Rugby Blog Dashboard</h2>
+            <p>Select an option above.</p>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+
+</body>
+</html>
