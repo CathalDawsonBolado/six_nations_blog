@@ -114,7 +114,7 @@ $(document).ready(function () {
             success: function () {
                 $("#postTitle").val("");
                 $("#postContent").val("");
-                fetchPosts();
+				fetchPosts();
             },
             error: function (xhr) {
                 console.error("Error creating post:", xhr);
