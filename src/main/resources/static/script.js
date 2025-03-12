@@ -66,6 +66,60 @@ $(document).ready(function () {
         });
     });
 
+    $("#loginForm").submit(function (event) {
+        event.preventDefault();
+        let loginData = {
+            identifier: $("#loginIdentifier").val(),
+            password: $("#loginPassword").val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/api/auth/login",
+            contentType: "application/json",
+            data: JSON.stringify(loginData),
+            success: function (response) {
+                localStorage.setItem("jwtToken", response);
+                showDashboard();
+                let userRole = getUserRoleFromToken(response);
+                loadContentInto(userRole === "ADMIN" ? "admin-dashboard.html" : "user-dashboard.html");
+            },
+            error: function (xhr) {
+                alert("Login failed: " + xhr.responseText);
+            }
+        });
+    });
+
+    $("#registerForm").submit(function (event) {
+        event.preventDefault();
+
+        let username = $("#regUsername").val().trim();
+        let email = $("#regEmail").val().trim();
+        let password = $("#regPassword").val().trim();
+
+        if (!username || !email || !password) {
+            alert("All fields are required.");
+            return;
+        }
+
+        let registerData = { username, email, password };
+
+        $.ajax({
+            type: "POST",
+            url: "/api/auth/register",
+            contentType: "application/json",
+            data: JSON.stringify(registerData),
+            success: function () {
+                alert("Registration successful! You can now log in.");
+                $("#registerPage").hide();
+                $("#loginPage").show();
+            },
+            error: function (xhr) {
+                alert("Registration failed: " + xhr.responseText);
+            }
+        });
+    });
+
     $("#logoutBtn").click(function () {
         localStorage.removeItem("jwtToken");
         window.location.href = "index.html";
@@ -81,7 +135,13 @@ $(document).ready(function () {
         $("#loginPage").show();
     });
 
-    $("#loadUserDashboard").click(() => loadContentInto("user-dashboard.html"));
-    $("#loadAdminDashboard").click(() => loadContentInto("admin-dashboard.html"));
+    $("#userDashboardBtn").click(() => loadContentInto("user-dashboard.html"));
+    $("#adminDashboardBtn").click(() => loadContentInto("admin-dashboard.html"));
 });
+
+
+
+
+
+
 

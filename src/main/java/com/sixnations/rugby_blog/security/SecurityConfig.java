@@ -26,19 +26,26 @@ public class SecurityConfig {
                 .requestMatchers("/", "/index.html", "/styles.css", "/script.js").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
-                .requestMatchers("/api/auth/login", "/api/users").permitAll()
+                .requestMatchers("/api/auth/login", "/api/users", "/api/auth/register").permitAll()
                 .requestMatchers("/user-dashboard.css", "/user-dashboard.js", "/user-dashboard.html").permitAll()
                 .requestMatchers("/admin-dashboard.css", "/admin-dashboard.js", "/admin-dashboard.html").permitAll()
-
-                // 🚨 FIX: Allow commenting
-                .requestMatchers(HttpMethod.POST, "/api/comments/create/**").hasAuthority("USER") // ✅ FIXED!
-
-                // 🚨 Ensure posting still works
-                .requestMatchers(HttpMethod.POST, "/api/posts/create").hasAuthority("USER") 
                 .requestMatchers("/images/SixNationsTrophy.PNG").permitAll()
                 .requestMatchers("/images/TripleCrown.PNG").permitAll()
-                .requestMatchers("/api/posts/delete/**").hasAuthority("ROLE_USER")
-                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+
+                
+                .requestMatchers(HttpMethod.POST, "/api/likes/post/**").hasAnyAuthority("USER", "ADMIN")  
+                .requestMatchers(HttpMethod.POST, "/api/likes/comment/**").hasAnyAuthority("USER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/likes/**").hasAuthority("USER")  
+
+                
+                .requestMatchers(HttpMethod.POST, "/api/comments/create/**").hasAnyAuthority("USER", "ADMIN")
+
+                // ✅ Ensure posting works
+                .requestMatchers(HttpMethod.POST, "/api/posts/create").hasAnyAuthority("USER", "ADMIN") 
+                .requestMatchers(HttpMethod.DELETE, "/api/posts/delete/**").hasAnyAuthority("USER", "ADMIN")
+
+                // ✅ Admin routes
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
                 .anyRequest().authenticated()
             )
@@ -48,9 +55,8 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
 }
+
 
 
 

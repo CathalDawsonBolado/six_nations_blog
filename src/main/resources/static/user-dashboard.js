@@ -8,15 +8,19 @@ $(document).ready(function () {
     function getUserDataFromToken(token) {
         try {
             let payload = JSON.parse(atob(token.split(".")[1]));
-            return { username: payload.username };
+            return { username: payload.username, role: payload.role };
         } catch (error) {
             console.error("Error decoding token:", error);
             window.location.href = "index.html";
         }
     }
 
-    const { username } = getUserDataFromToken(token);
+    const { username, role } = getUserDataFromToken(token);
     $("#username").text(username);
+
+    if (role !== "ADMIN") {
+        $("#loadAdminDashboard").hide(); // Hide Admin Dashboard Button for Users
+    }
 
     function showConfirmDialog(message, callback) {
         $("#confirmMessage").text(message);
@@ -45,7 +49,6 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $("#loadingPosts").hide();
-
                 console.log("API response for posts:", response);
 
                 let posts = response._embedded?.postList;
@@ -59,17 +62,22 @@ $(document).ready(function () {
                 let postHtml = "";
                 posts.forEach(post => {
                     postHtml += `
-                        <div class="post">
-                            <h5>${post.title}</h5>
-                            <p>${post.content}</p>
-                            <button class="btn btn-success like-button" data-id="${post.id}">👍 Like</button>
-                            <button class="btn btn-danger delete-button" data-id="${post.id}">Delete</button>
-                            <div class="comment-section" id="comments-${post.id}">
-                                <input type="text" class="form-control comment-input" data-id="${post.id}" placeholder="Write a comment...">
-                                <button class="btn btn-primary comment-button" data-id="${post.id}">Comment</button>
-                            </div>
-                            <div class="comments-list" id="comments-list-${post.id}"></div>
-                        </div>
+					<div class="post">
+					       <h5>${post.title}</h5>
+					       <p><strong>Posted by: ${post.username}</strong></p>
+					       <p>${post.content}</p>
+					       <button class="btn btn-blue like-button ${post.liked ? 'liked' : ''}" 
+					               data-id="${post.id}" 
+					               data-likeId="${post.likeId || ''}">
+					           ${post.liked ? `❤️ Liked (${post.likesCount || 0})` : `👍 Like (${post.likesCount || 0})`}
+					       </button>
+					       ${role === "ADMIN" ? `<button class="btn btn-danger delete-button" data-id="${post.id}">Delete</button>` : ""}
+					       <div class="comment-section" id="comments-${post.id}">
+					           <input type="text" class="form-control comment-input" data-id="${post.id}" placeholder="Write a comment...">
+					           <button class="btn btn-green comment-button" data-id="${post.id}">Comment</button>
+					       </div>
+					       <div class="comments-list" id="comments-list-${post.id}"></div>
+					   </div>
                     `;
                 });
 
@@ -93,7 +101,7 @@ $(document).ready(function () {
             return;
         }
 
-        console.log("Creating post with title:", title, "and content:", content);
+        console.log("Creating post:", title);
 
         $.ajax({
             type: "POST",
@@ -103,21 +111,20 @@ $(document).ready(function () {
                 "Content-Type": "application/json"
             },
             data: JSON.stringify({ title, content }),
-            success: function (response) {
-                console.log("Post created successfully:", response);
+            success: function () {
                 $("#postTitle").val("");
                 $("#postContent").val("");
                 fetchPosts();
             },
             error: function (xhr) {
                 console.error("Error creating post:", xhr);
-                alert("Error creating post. Check console for details.");
+                alert("Error creating post.");
             }
         });
     }
 
     function deletePost(postId) {
-        console.log("Deleting post with ID:", postId);
+        console.log(`Deleting post with ID: ${postId}`);
         
         $.ajax({
             type: "DELETE",
@@ -127,7 +134,6 @@ $(document).ready(function () {
                 "Content-Type": "application/json"
             },
             success: function () {
-                console.log("Post deleted successfully.");
                 fetchPosts();
             },
             error: function (xhr) {
@@ -137,104 +143,131 @@ $(document).ready(function () {
         });
     }
 
-	function addComment(postId, commentText) {
-	    console.log(`Adding comment to post ${postId}:`, commentText);
+    function toggleLike(postId, button) {
+        let isLiked = button.hasClass("liked");
+        let likeId = button.data("likeId");
 
-	    $.ajax({
-	        type: "POST",
-	        url: `/api/comments/create/${postId}`,  // ✅ Ensure `postId` is in URL
-	        headers: { 
-	            "Authorization": "Bearer " + token,
-	            "Content-Type": "application/json"
-	        },
-	        data: JSON.stringify({ content: commentText }), // ✅ Use `content`, not `text`
-	        success: function (response) {
-	            console.log("✅ Comment added successfully:", response);
+        console.log(`Toggling like for post ${postId}, isLiked: ${isLiked}`);
 
-	            // ✅ Clear input field
-	            $(".comment-input[data-id='" + postId + "']").val("");
+        let method = isLiked ? "DELETE" : "POST";
+        let url = isLiked ? `/api/likes/${likeId}` : `/api/likes/post/${postId}`;
 
-	            // ✅ Fetch all comments again
-	            fetchComments(postId);
-	        },
-	        error: function (xhr) {
-	            console.error("❌ Error adding comment:", xhr);
-	            alert("Failed to add comment. Check console for details.");
-	        }
-	    });
-	}
+        $.ajax({
+            type: method,
+            url: url,
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            success: function (response) {
+                let likesCount = response.likesCount ?? 0; 
 
+                if (method === "POST") {
+                    button.addClass("liked");
+                    button.data("likeId", response.id); 
+                    button.html(`❤️ Liked (${likesCount})`);
+                } else {
+                    button.removeClass("liked");
+                    button.removeData("likeId");
+                    button.html(`👍 Like (${likesCount})`);
+                }
+            },
+            error: function (xhr) {
+                console.error("Error toggling like:", xhr);
+                alert("Error toggling like.");
+            }
+        });
+    }
 
+    function addComment(postId, commentText) {
+        console.log(`Adding comment to post ${postId}: ${commentText}`);
 
+        $.ajax({
+            type: "POST",
+            url: `/api/comments/create/${postId}`,
+            headers: { 
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify({ content: commentText }),
+            success: function () {
+                $(`.comment-input[data-id='${postId}']`).val("");  
+                fetchComments();
+            },
+            error: function (xhr) {
+                console.error("Error adding comment:", xhr);
+                alert("Failed to add comment.");
+            }
+        });
+    }
 
-	function fetchComments(postId) {
-	    console.log(`Fetching comments for post ${postId}...`);
+    function fetchComments() {
+        console.log("Fetching comments...");
 
-	    $.ajax({
-	        type: "GET",
-	        url: `/api/comments/${postId}`,  // ✅ Ensure this matches backend route
-	        headers: { 
-	            "Authorization": "Bearer " + token,
-	            "Content-Type": "application/json"
-	        },
-	        success: function (response) {
-	            console.log(`✅ Comments fetched for post ${postId}:`, response);
+        $(".comments-list").empty(); 
 
-	            let comments = response._embedded?.commentList;
-	            let commentsList = $(`#comments-list-${postId}`);
+        $(".post").each(function () {
+            let postId = $(this).find(".comment-input").data("id");
 
-	            commentsList.empty(); // ✅ Clear previous comments
+            $.ajax({
+                type: "GET",
+                url: `/api/comments/${postId}`,  
+                headers: { 
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                success: function (response) {
+                    let comments = response._embedded?.commentList;
 
-	            if (!Array.isArray(comments) || comments.length === 0) {
-	                console.warn(`⚠️ No comments found for post ${postId}.`);
-	                return;
-	            }
+                    if (!Array.isArray(comments)) {
+                        console.error("Unexpected API response for comments:", response);
+                        return;
+                    }
 
-	            // ✅ Append each comment under the correct post
-	            comments.forEach(comment => {
-	                let commentHtml = `<p><strong>${comment.user.username}:</strong> ${comment.content}</p>`;
-	                commentsList.append(commentHtml);
-	            });
+                    let commentsContainer = $(`#comments-list-${postId}`);
+                    commentsContainer.empty();
 
-	            console.log(`✅ Successfully displayed all ${comments.length} comments for post ${postId}.`);
-	        },
-	        error: function (xhr) {
-	            console.error(`❌ Error fetching comments for post ${postId}:`, xhr);
-	        }
-	    });
-	}
+                    comments.forEach(comment => {
+                        let commentHtml = `<p><strong>${comment.user.username}:</strong> ${comment.content}</p>`;
+                        commentsContainer.append(commentHtml);
+                    });
+                },
+                error: function (xhr) {
+                    console.error(`Error fetching comments for post ${postId}:`, xhr);
+                }
+            });
+        });
+    }
 
-
+    $(document).on("click", ".like-button", function () {
+        toggleLike($(this).data("id"), $(this));
+    });
 
     $(document).on("click", ".comment-button", function () {
         let postId = $(this).data("id");
-        let commentText = $(".comment-input[data-id='" + postId + "']").val().trim();
+        let commentText = $(`.comment-input[data-id='${postId}']`).val().trim();
         
         if (!commentText) {
             alert("Comment cannot be empty.");
             return;
         }
 
-        console.log(`Adding comment to post ${postId}:`, commentText);
         addComment(postId, commentText);
     });
 
     $(document).on("click", ".delete-button", function () {
-        let postId = $(this).data("id");
-        showConfirmDialog("Are you sure you want to delete this post?", function () {
-            deletePost(postId);
-        });
+        showConfirmDialog("Are you sure you want to delete this post?", () => deletePost($(this).data("id")));
     });
 
     $("#createPostButton").click(createPost);
-    $("#logoutButton").click(function () {
-        console.log("Logging out user...");
-        localStorage.removeItem("jwtToken");
-        window.location.href = "index.html";
-    });
 
     fetchPosts();
 });
+
+
+
+
+
 
 
 

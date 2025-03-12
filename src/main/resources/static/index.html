@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -56,9 +56,11 @@
 
     <div id="dashboardSection" class="hidden">
         <nav class="navbar">
-            <button id="loadUserDashboard">User Dashboard</button>
-            <button id="loadAdminDashboard">Admin Dashboard</button>
-            <button id="logoutBtn">Logout</button>
+            <div class="button-container">
+                <button id="userDashboardBtn" class="btn hidden">User Dashboard</button>
+                <button id="adminDashboardBtn" class="btn hidden">Admin Dashboard</button>
+                <button id="logoutBtn" class="btn">Logout</button>
+            </div>
         </nav>
 
         <div id="content">
@@ -71,3 +73,5 @@
 
 </body>
 </html>
+
+

@@ -10,27 +10,27 @@ public class Like {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = true) // ✅ Post can be NULL (if this is a comment like)
+    @JoinColumn(name = "post_id", nullable = true) 
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "comment_id", nullable = true) // ✅ Comment can be NULL (if this is a post like)
+    @JoinColumn(name = "comment_id", nullable = true) 
     private Comment comment;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false) // ✅ User must always be present
+    @JoinColumn(name = "user_id", nullable = false) 
     private User user;
 
     public Like() {}
 
-    // ✅ Constructor for liking a post
+    // Constructor for liking a post
     public Like(User user, Post post) {
         this.user = user;
         this.post = post;
         this.comment = null; // Ensures this like is not linked to a comment
     }
 
-    // ✅ Constructor for liking a comment
+    // Constructor for liking a comment
     public Like(User user, Comment comment) {
         this.user = user;
         this.comment = comment;

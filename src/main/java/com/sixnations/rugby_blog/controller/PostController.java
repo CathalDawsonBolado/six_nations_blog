@@ -30,7 +30,7 @@ public class PostController {
         this.userService = userService;
     }
 
-    // ✅ Get All Posts
+    
     @GetMapping
     public CollectionModel<EntityModel<Post>> getAllPosts() {
         List<EntityModel<Post>> posts = postService.getAllPosts().stream()
@@ -42,7 +42,7 @@ public class PostController {
         return CollectionModel.of(posts, linkTo(methodOn(PostController.class).getAllPosts()).withSelfRel());
     }
 
-    // ✅ Get Post by ID
+    
     @GetMapping("/{postId}")
     public ResponseEntity<EntityModel<Post>> getPostById(@PathVariable Long postId) {
         Optional<Post> postOpt = postService.getPostById(postId);
@@ -57,7 +57,7 @@ public class PostController {
         return ResponseEntity.ok(postResource);
     }
 
-    // ✅ Search Posts
+    
     @GetMapping("/search")
     public ResponseEntity<List<Post>> searchPosts(@RequestParam("query") String query) {
         List<Post> posts = postService.searchPosts(query);
@@ -69,14 +69,14 @@ public class PostController {
     public ResponseEntity<Post> createPost(@RequestBody Post post, Principal principal) {
         if (principal == null) {
             System.out.println("❌ ERROR: Principal is NULL - User might not be authenticated");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // ✅ Fetch the logged-in user from the database
+       
         Optional<User> optionalUser = userService.findByUsername(principal.getName());
         if (optionalUser.isEmpty()) {
             System.out.println("❌ ERROR: User not found for username: " + principal.getName());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); 
         }
 
         // ✅ Assign the user to the post before saving

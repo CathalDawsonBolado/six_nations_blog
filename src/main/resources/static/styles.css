@@ -1,14 +1,14 @@
-/* Global Styles */
+/* === Global Styles === */
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
     background-color: #121212;
     color: white;
     text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
-/* ========================== LOGIN & REGISTRATION ========================== */
+/* === Authentication Section === */
 .auth-container {
     display: flex;
     justify-content: center;
@@ -19,8 +19,8 @@ body {
 
 /* Trophy Images */
 .trophy {
-    width: 15%;  /* Make smaller */
-    max-width: 150px;  /* Prevent too big images */
+    width: 15%;
+    max-width: 150px;
     height: auto;
     position: absolute;
     top: 50%;
@@ -28,20 +28,20 @@ body {
 }
 
 .trophy.left {
-    left: 2%;  /* Adjust position */
+    left: 2%;
 }
 
 .trophy.right {
-    right: 2%;  /* Adjust position */
+    right: 2%;
 }
 
 /* Login & Register Box */
 .auth-box {
     background: rgba(255, 255, 255, 0.1);
-    padding: 20px;  /* Reduce padding */
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
-    width: 280px;  /* Make it a bit smaller */
+    width: 280px;
 }
 
 /* Form Fields */
@@ -50,9 +50,9 @@ body {
 }
 
 .form-group input {
-    width: 85%;  /* Reduce width */
-    padding: 8px; /* Smaller padding */
-    font-size: 14px; /* Smaller text */
+    width: 85%;
+    padding: 8px;
+    font-size: 14px;
     border: none;
     border-radius: 5px;
     margin-top: 5px;
@@ -62,9 +62,9 @@ body {
 
 /* Buttons */
 .btn {
-    width: 85%; /* Reduce width */
-    padding: 8px; /* Smaller padding */
-    font-size: 14px; /* Smaller text */
+    width: 85%;
+    padding: 8px;
+    font-size: 14px;
     background-color: #ff9800;
     color: black;
     font-weight: bold;
@@ -72,20 +72,20 @@ body {
     cursor: pointer;
     display: block;
     margin: auto;
+    border: none;
 }
 
 .btn:hover {
     background-color: #e6b800;
 }
 
-/* Hide Unnecessary Elements */
+/* Hide Elements */
 .hidden {
     display: none;
 }
 
-/* ========================== DASHBOARD PAGE ========================== */
+/* === Dashboard Section === */
 .dashboard-container {
-    display: none;
     padding: 20px;
 }
 
@@ -96,11 +96,69 @@ body {
     padding: 15px;
 }
 
-.btn-logout {
+/* Admin Dashboard Buttons */
+#userDashboardBtn, #adminDashboardBtn {
+    display: inline-block;
+    margin: 5px;
+    padding: 10px 15px;
+    background-color: #ff9800;
+    color: black;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+#userDashboardBtn:hover, #adminDashboardBtn:hover {
+    background-color: #e6b800;
+}
+
+/* Logout Button */
+#logoutBtn {
     background-color: red;
     color: white;
     font-weight: bold;
     padding: 8px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+/* Admin Page */
+.admin-container {
+    width: 80%;
+    margin: 50px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px gray;
+    color: black;
+    text-align: left;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+th {
+    background-color: #0056b3;
+    color: white;
+}
+
+.loading {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
 }

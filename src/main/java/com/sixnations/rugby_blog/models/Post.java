@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 @Table(name = "posts")
 public class Post {
@@ -24,7 +26,6 @@ public class Post {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // ✅ Likes feature (Many-to-Many with Users)
     @ManyToMany
     @JoinTable(
         name = "post_likes",
@@ -42,7 +43,7 @@ public class Post {
         this.createdAt = LocalDateTime.now();
     }
 
-    // ✅ Getters and Setters
+    
     public Long getId() {
         return id;
     }
@@ -79,6 +80,11 @@ public class Post {
         this.createdAt = createdAt;
     }
 
-    
+    // ✅ NEW: Expose username directly in JSON response
+    @JsonProperty("username")
+    public String getUsername() {
+        return user != null ? user.getUsername() : "Unknown";
+    }
 }
+
 

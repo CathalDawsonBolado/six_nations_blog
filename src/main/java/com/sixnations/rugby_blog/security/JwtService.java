@@ -19,13 +19,13 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     private final String secretKey = "VFblMcP2T60AvxXW2zdW9iynO7U49j6qFwV3ajkc5v+b6SIY38nl1ql0iVrqV8KXHlU8ZUUtzhrCbA4M/bc77w==";
-    private final long EXPIRATION_TIME = 1000 * 60 * 60; // ✅ 1 Hour Expiry
+    private final long EXPIRATION_TIME = 1000 * 60 * 60; 
 
     public String generateToken(CustomUserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
-        // ✅ FIX: Store roles correctly as a LIST
-        claims.put("roles", List.of(userDetails.getUser().getRole().name())); // ✅ FIX: No "ROLE_"
+       
+        claims.put("roles", List.of(userDetails.getUser().getRole().name())); 
 
 
         claims.put("email", userDetails.getUser().getEmail());

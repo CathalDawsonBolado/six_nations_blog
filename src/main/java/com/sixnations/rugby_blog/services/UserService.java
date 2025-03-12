@@ -24,17 +24,17 @@ public class UserService {
         this.commentRepo = commentRepo;
     }
 
-    // ✅ Find user by email
+    
     public Optional<User> findByUserEmail(String email) {
         return userRepo.findByEmailIgnoreCase(email);
     }
 
-    // ✅ Find user by username
+   
     public Optional<User> findByUsername(String username) {
         return userRepo.findByUsernameIgnoreCase(username);
     }
 
-    // ✅ Promote a user to admin
+    
     public boolean promoteUserToAdmin(Long userId) {
         Optional<User> userOpt = userRepo.findById(userId);
         if (userOpt.isPresent()) {
@@ -49,7 +49,7 @@ public class UserService {
         return false;
     }
 
-    // ✅ Suspend a user
+    
     public boolean suspendUser(Long userId) {
         Optional<User> userOpt = userRepo.findById(userId);
         if (userOpt.isPresent()) {
@@ -61,7 +61,7 @@ public class UserService {
         return false;
     }
 
-    // ✅ Unsuspend a user
+    
     public boolean unsuspendedUser(Long userId) {
         Optional<User> userOpt = userRepo.findById(userId);
         if (userOpt.isPresent()) {
@@ -75,7 +75,7 @@ public class UserService {
         return false;
     }
 
-    // ✅ Delete a post
+    
     public boolean deletePost(Long postId) {
         if (postRepo.existsById(postId)) {
             postRepo.deleteById(postId);
@@ -84,7 +84,7 @@ public class UserService {
         return false;
     }
 
-    // ✅ Delete a comment
+    
     public boolean deleteComment(Long commentId) {
         if (commentRepo.existsById(commentId)) {
             commentRepo.deleteById(commentId);
@@ -93,17 +93,17 @@ public class UserService {
         return false;
     }
 
-    // ✅ Get all users
+    
     public List<User> getAllUsers() {
         return userRepo.findAll();
     }
 
-    // ✅ Search users by username or email
+    
     public List<User> searchUsers(String query) {
         return userRepo.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query);
     }
 
-    // ✅ Save a new user
+    
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepo.save(user);

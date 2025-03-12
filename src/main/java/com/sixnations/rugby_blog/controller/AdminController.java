@@ -20,7 +20,7 @@ public class AdminController {
         this.userService = userService;
     }
 
-    // ✅ Promote User to Admin
+   
     @PutMapping("/promote/{userId}")
     public ResponseEntity<String> promoteUser(@PathVariable Long userId) {
         boolean promoted = userService.promoteUserToAdmin(userId);
@@ -29,7 +29,7 @@ public class AdminController {
         }
         return ResponseEntity.badRequest().body("User not found or already an Admin.");
     }
- // ✅ Get All Users (Admin Only)
+ 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
@@ -37,7 +37,7 @@ public class AdminController {
     }
 
 
-    // ✅ Suspend User
+    
     @PutMapping("/suspend/{userId}")
     public ResponseEntity<String> suspendUser(@PathVariable Long userId) {
         boolean suspended = userService.suspendUser(userId);
@@ -46,7 +46,7 @@ public class AdminController {
         }
         return ResponseEntity.badRequest().body("User not found or already suspended.");
     }
-    @PutMapping("/unsuspend/{userId}") // 🔥 Fix Path Variable name
+    @PutMapping("/unsuspend/{userId}") 
     public ResponseEntity<String> unsuspendUser(@PathVariable Long userId) {
 
     	boolean isUnsuspended = userService.unsuspendedUser(userId);
@@ -57,7 +57,7 @@ public class AdminController {
     	}
     }
 
-    // ✅ Delete a Post
+    
     @DeleteMapping("/delete/post/{postId}")
     public ResponseEntity<String> deletePost(@PathVariable Long postId) {
         boolean deleted = userService.deletePost(postId);
@@ -67,7 +67,7 @@ public class AdminController {
         return ResponseEntity.badRequest().body("Post not found.");
     }
 
-    // ✅ Delete a Comment
+    
     @DeleteMapping("/delete/comment/{commentId}")
     public ResponseEntity<String> deleteComment(@PathVariable Long commentId) {
         boolean deleted = userService.deleteComment(commentId);

@@ -33,12 +33,12 @@ public class CustomAuthenticationManager implements AuthenticationManager{
 
 	    CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
 
-	    // 🚨 **CHECK IF USER IS SUSPENDED**
+	    
 	    if (customUserDetails.getUser().isSuspended()) {
 	        throw new BadCredentialsException("User is suspended and cannot log in.");
 	    }
 
-	    // ✅ Check if password is correct
+	    
 	    if (!passwordEncoder.matches(password, userDetails.getPassword())) {
 	        throw new BadCredentialsException("Invalid password!");
 	    }

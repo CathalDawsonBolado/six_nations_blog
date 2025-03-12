@@ -36,12 +36,12 @@ public class CommentService {
         return commentRepo.findByPost(postOpt.get());
     }
 
-    // ✅ Check if post exists (Missing method in your service, now added!)
+    
     public boolean postExists(Long postId) {
         return postRepo.existsById(postId);
     }
 
-    // ✅ Create a comment
+    
     public Comment createComment(Long postId, String content, String username) throws AccessDeniedException {
         System.out.println("📢 Checking if post exists for ID: " + postId);
         Optional<Post> postOpt = postRepo.findById(postId);
@@ -59,14 +59,14 @@ public class CommentService {
             throw new IllegalArgumentException("User not found.");
         }
 
-        // ❌ Check if user is suspended
+        
         User user = userOpt.get();
         if (user.isSuspended()) {
             System.out.println("❌ ERROR: User " + username + " is suspended and cannot comment.");
             throw new AccessDeniedException("User is suspended and cannot comment.");
         }
 
-        // ✅ Save comment
+        
         Comment comment = new Comment(content, postOpt.get(), user);
         Comment savedComment = commentRepo.save(comment);
         System.out.println("✅ Comment successfully created with ID: " + savedComment.getId());
@@ -74,7 +74,7 @@ public class CommentService {
         return savedComment;
     }
 
-    // ✅ Delete a comment (Only Admin or the author)
+   
     public boolean deleteComment(Long commentId, String username) throws AccessDeniedException {
         System.out.println("📢 Attempting to delete comment with ID: " + commentId);
         Optional<Comment> commentOpt = commentRepo.findById(commentId);

@@ -15,11 +15,11 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private Post post;  // ✅ Link comment to a post
+    private Post post;  
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;  // ✅ Link comment to a user
+    private User user;  
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

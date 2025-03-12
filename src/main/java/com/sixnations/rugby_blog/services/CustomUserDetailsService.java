@@ -32,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	    User user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
 
-	    return new CustomUserDetails(user); // 🔥 Correctly create an instance
+	    return new CustomUserDetails(user); 
 	}
 
 	

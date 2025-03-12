@@ -17,14 +17,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    // ✅ Register User
+    
     @PostMapping
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.ok(savedUser);
     }
 
-    // ✅ Get User by Email
+    
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         return userService.findByUserEmail(email)
@@ -32,7 +32,7 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Search Users (Admins & Users)
+    
     @GetMapping("/search")
     public ResponseEntity<List<User>> searchUsers(@RequestParam("query") String query) {
         List<User> users = userService.searchUsers(query);

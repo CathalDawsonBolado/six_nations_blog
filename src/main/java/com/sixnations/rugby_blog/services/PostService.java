@@ -20,38 +20,38 @@ public class PostService {
         this.userRepo = userRepo;
     }
 
-    // ✅ Get all posts (Public)
+    
     public List<Post> getAllPosts() {
         return postRepo.findAll();
     }
 
-    // ✅ Get a specific post by ID
+    
     public Optional<Post> getPostById(Long postId) {
         return postRepo.findById(postId);
     }
 
-    // ✅ Search posts by title or content
+   
     public List<Post> searchPosts(String query) {
         return postRepo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(query, query);
     }
 
-    // ✅ Get all posts by a specific user
+    
     public List<Post> getPostsByUser(String username) {
         return postRepo.findByUserUsername(username);
     }
 
-    // ✅ Create a new post
+    
     public Post createPost(Post post) {
         return postRepo.save(post);
     }
 
-    // ✅ Update a post (Only the author can update)
+    
     public Post updatePost(Long postId, Post updatedPost, String username) throws AccessDeniedException {
         Optional<Post> existingPostOpt = postRepo.findById(postId);
         if (existingPostOpt.isPresent()) {
             Post existingPost = existingPostOpt.get();
 
-            // ✅ Ensure only the author can edit
+            
             if (!existingPost.getUser().getUsername().equals(username)) {
                 throw new AccessDeniedException("You are not allowed to edit this post!");
             }
@@ -63,7 +63,7 @@ public class PostService {
         return null;
     }
 
-    // ✅ Delete a post (Only the author or an admin can delete)
+    
     public boolean deletePost(Long postId, String username) throws AccessDeniedException {
         Optional<Post> postOpt = postRepo.findById(postId);
         if (postOpt.isPresent()) {
@@ -74,7 +74,7 @@ public class PostService {
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
 
-                // ✅ Allow author or admin to delete
+                
                 if (user.equals(author) || user.getRole() == User.Role.ADMIN) {
                     postRepo.deleteById(postId);
                     return true;
@@ -85,7 +85,7 @@ public class PostService {
         return false;
     }
 
-    // ✅ Get user by identifier (email or username)
+    
     public User getUserByIdentifier(String identifier) {
         Optional<User> userOpt;
 

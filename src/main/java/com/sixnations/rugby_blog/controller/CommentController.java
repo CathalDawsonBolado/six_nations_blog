@@ -9,7 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -24,19 +28,32 @@ public class CommentController {
         this.jwtService = jwtService;
     }
 
-    // ✅ Get Comments for a Post (HATEOAS)
     @GetMapping("/{postId}")
-    public CollectionModel<EntityModel<Comment>> getCommentsByPost(@PathVariable Long postId) {
-        List<EntityModel<Comment>> comments = commentService.getCommentsByPost(postId).stream()
+    public ResponseEntity<?> getCommentsByPost(@PathVariable Long postId) {
+        System.out.println("📢 Fetching comments for post: " + postId);
+
+        List<Comment> commentList = commentService.getCommentsByPost(postId);
+
+        if (commentList.isEmpty()) {
+            System.out.println("⚠️ No comments found for post: " + postId);
+        }
+
+        List<EntityModel<Comment>> comments = commentList.stream()
                 .map(comment -> EntityModel.of(comment,
                         linkTo(methodOn(CommentController.class).getCommentsByPost(postId)).withSelfRel()
                 )).collect(Collectors.toList());
 
-        return CollectionModel.of(comments, linkTo(methodOn(CommentController.class).getCommentsByPost(postId)).withSelfRel());
+       
+        Map<String, Object> response = new HashMap<>();
+        response.put("_embedded", Collections.singletonMap("commentList", comments));
+
+        return ResponseEntity.ok(response);
     }
 
-    // ✅ Create a Comment (HATEOAS)
-    @PostMapping("/create/{postId}") // ✅ Ensure this matches the frontend request
+
+
+    
+    @PostMapping("/create/{postId}") 
     public ResponseEntity<EntityModel<Comment>> createComment(
             @PathVariable Long postId, 
             @RequestBody Comment comment, 
@@ -44,7 +61,7 @@ public class CommentController {
         try {
             System.out.println("📢 Received request to add a comment to post ID: " + postId);
 
-            // ✅ Extract Username from JWT
+           
             String username = extractUsernameFromToken(request);
             
             if (username == null) {
@@ -55,13 +72,13 @@ public class CommentController {
             System.out.println("✅ User " + username + " is adding a comment to post ID " + postId);
             System.out.println("📝 Comment Content: " + comment.getContent());
 
-            // ✅ Ensure postId exists in database
+            
             if (!commentService.postExists(postId)) {
                 System.out.println("❌ ERROR: Post with ID " + postId + " does not exist.");
                 return ResponseEntity.status(404).build(); // Post not found
             }
 
-            // ✅ Create Comment with extracted username
+            
             Comment savedComment = commentService.createComment(postId, comment.getContent(), username);
             
             System.out.println("✅ Successfully saved comment with ID: " + savedComment.getId());
@@ -74,7 +91,7 @@ public class CommentController {
 
         } catch (Exception e) {
             System.out.println("❌ ERROR: Failed to create comment: " + e.getMessage());
-            e.printStackTrace(); // ✅ Print full stack trace for debugging
+            e.printStackTrace(); 
             return ResponseEntity.status(500).build();
         }
     }

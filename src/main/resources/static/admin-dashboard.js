@@ -38,66 +38,73 @@ $(document).ready(function () {
         });
     }
 
-    function showConfirmDialog(message, callback) {
+    // ✅ Make functions globally accessible by attaching them to `window`
+    window.showConfirmDialog = function (message, callback) {
         $("#confirmMessage").text(message);
         $("#confirmModal").removeClass("hidden");
+
         $("#confirmYes").off("click").on("click", function () {
             $("#confirmModal").addClass("hidden");
             callback();
         });
+
         $("#confirmNo").off("click").on("click", function () {
             $("#confirmModal").addClass("hidden");
         });
-    }
+    };
 
-    function promoteUser(userId) {
+    window.promoteUser = function (userId) {
         $.ajax({
             url: `/api/admin/promote/${userId}`,
             method: "PUT",
             headers: { "Authorization": "Bearer " + token },
             success: function () {
+                alert("User promoted successfully.");
                 loadUsers();
             },
             error: function () {
                 alert("Error promoting user.");
             }
         });
-    }
+    };
 
-    function suspendUser(userId) {
+    window.suspendUser = function (userId) {
         $.ajax({
             url: `/api/admin/suspend/${userId}`,
             method: "PUT",
             headers: { "Authorization": "Bearer " + token },
             success: function () {
+                alert("User suspended successfully.");
                 loadUsers();
             },
             error: function () {
                 alert("Error suspending user.");
             }
         });
-    }
+    };
 
-    function unsuspendUser(userId) {
+    window.unsuspendUser = function (userId) {
         $.ajax({
             url: `/api/admin/unsuspend/${userId}`,
             method: "PUT",
             headers: { "Authorization": "Bearer " + token },
             success: function () {
+                alert("User unsuspended successfully.");
                 loadUsers();
             },
             error: function () {
                 alert("Error unsuspending user.");
             }
         });
-    }
+    };
 
-    $("#logoutBtn").click(function () {
-        localStorage.removeItem("jwtToken");
-        window.location.href = "index.html";
-    });
+   
+
+    console.log("✅ admin-dashboard.js loaded successfully! All functions are now globally available.");
 
     loadUsers();
 });
+ 
+
 
 

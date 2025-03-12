@@ -40,15 +40,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         token = token.substring(7);
         try {
             String username = jwtService.extractUsername(token);
-            List<String> roles = jwtService.extractUserRoles(token); // ✅ Extract roles properly
+            List<String> roles = jwtService.extractUserRoles(token);
             
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtService.isTokenValid(token, userDetails)) {
-                    // 🚨 FIX: Convert roles properly into SimpleGrantedAuthority
+                    
                 	List<SimpleGrantedAuthority> authorities = roles.stream()
-                		    .map(role -> new SimpleGrantedAuthority(role.replace("ROLE_", ""))) // ✅ FIX: Remove "ROLE_"
+                		    .map(role -> new SimpleGrantedAuthority(role.replace("ROLE_", ""))) 
                 		    .collect(Collectors.toList());
 
                 		System.out.println("✅ Final Spring Security Authorities: " + authorities);
