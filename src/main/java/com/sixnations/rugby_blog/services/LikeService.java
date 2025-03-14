@@ -61,16 +61,19 @@ public class LikeService {
     }
 
     
-    public boolean unlike(Long likeId, String username) {
-        Optional<Like> likeOpt = likeRepo.findById(likeId);
+    public boolean unlike(Long postId, String username) {
+        User user = userRepo.findByUsernameIgnoreCase(username)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Post post = postRepo.findById(postId)
+                    .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        Optional<Like> likeOpt = likeRepo.findByUserAndPost(user, post);
         if (likeOpt.isEmpty()) return false; // Like does not exist
 
-        Like like = likeOpt.get();
-        if (!like.getUser().getUsername().equalsIgnoreCase(username)) return false; // Not authorized
-
-        likeRepo.deleteById(likeId);
+        likeRepo.delete(likeOpt.get()); // Remove like
         return true;
     }
+
 
     
     public List<Like> getLikesForPost(Long postId) {
@@ -90,5 +93,9 @@ public class LikeService {
     public Optional<Like> getLikeById(Long likeId) {
         return likeRepo.findById(likeId);
     }
+    public int getLikeCount(Long postId) {
+        return likeRepo.countByPostId(postId);
+    }
+
 }
 

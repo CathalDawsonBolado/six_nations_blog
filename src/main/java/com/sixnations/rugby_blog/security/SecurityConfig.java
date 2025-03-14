@@ -35,7 +35,7 @@ public class SecurityConfig {
                 
                 .requestMatchers(HttpMethod.POST, "/api/likes/post/**").hasAnyAuthority("USER", "ADMIN")  
                 .requestMatchers(HttpMethod.POST, "/api/likes/comment/**").hasAnyAuthority("USER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/likes/**").hasAuthority("USER")  
+                .requestMatchers(HttpMethod.DELETE, "/api/likes/**").hasAnyAuthority("USER")  
 
                 
                 .requestMatchers(HttpMethod.POST, "/api/comments/create/**").hasAnyAuthority("USER", "ADMIN")

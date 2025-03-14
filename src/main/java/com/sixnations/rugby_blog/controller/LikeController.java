@@ -8,7 +8,10 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -26,14 +29,27 @@ public class LikeController {
 
    
     @PostMapping("/post/{postId}")
-    public ResponseEntity<EntityModel<Like>> toggleLikePost(@PathVariable Long postId, HttpServletRequest request) {
+    public ResponseEntity<EntityModel<Map<String, Object>>> toggleLikePost(
+            @PathVariable Long postId, HttpServletRequest request) {
+
         String username = extractUsernameFromToken(request);
         if (username == null) return ResponseEntity.status(401).body(null);
 
         Optional<Like> like = likeService.toggleLikePost(postId, username);
-        return like.map(value -> ResponseEntity.ok(convertToHateoasModel(value)))
-                   .orElse(ResponseEntity.status(404).body(null));
+        int updatedLikeCount = likeService.getLikeCount(postId); // ✅ Get updated like count
+
+        // ✅ Create response map
+        Map<String, Object> response = new HashMap<>();
+        response.put("likesCount", updatedLikeCount); // ✅ Updated like count
+        like.ifPresent(value -> response.put("id", value.getId())); // ✅ Include like ID if exists
+
+        // ✅ Wrap in HATEOAS entity model
+        EntityModel<Map<String, Object>> hateoasResponse = EntityModel.of(response);
+        hateoasResponse.add(linkTo(methodOn(LikeController.class).toggleLikePost(postId, request)).withSelfRel());
+
+        return ResponseEntity.ok(hateoasResponse);
     }
+
 
    
     @PostMapping("/comment/{commentId}")
@@ -47,16 +63,24 @@ public class LikeController {
     }
 
     
-    @DeleteMapping("/{likeId}")
-    public ResponseEntity<String> unlike(@PathVariable Long likeId, HttpServletRequest request) {
+    @DeleteMapping("/post/{postId}")
+    public ResponseEntity<EntityModel<Map<String, Object>>> unlike(@PathVariable Long postId, HttpServletRequest request) {
         String username = extractUsernameFromToken(request);
-        if (username == null) return ResponseEntity.status(401).body("Unauthorized: Missing or invalid token");
-        System.out.println("🔍 User: " + username);
-        System.out.println("🔍 User Roles: " + request.isUserInRole("USER"));
-        boolean removed = likeService.unlike(likeId, username);
-        if (removed) return ResponseEntity.ok("Like removed successfully.");
-        return ResponseEntity.status(404).body("Like not found.");
+        if (username == null) return ResponseEntity.status(401).body(null);
+
+        boolean removed = likeService.unlike(postId, username);
+        if (!removed) return ResponseEntity.status(404).body(null);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Like removed successfully.");
+
+        EntityModel<Map<String, Object>> hateoasResponse = EntityModel.of(response);
+        hateoasResponse.add(linkTo(methodOn(LikeController.class).unlike(postId, request)).withSelfRel());
+
+        return ResponseEntity.ok(hateoasResponse);
     }
+
+
 
     
     @GetMapping("/{likeId}")
