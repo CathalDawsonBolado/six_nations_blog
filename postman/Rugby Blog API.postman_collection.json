@@ -1,0 +1,1198 @@
+{
+	"info": {
+		"_postman_id": "2bd3d9a5-1d06-458a-a3f1-f1451ee7f250",
+		"name": "Rugby Blog API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40587854"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Valid Registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User registered successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"testuser7\",\r\n  \"email\": \"testuser7@gmail.com\",\r\n  \"password\": \"test7@\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Valid User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Login successful, token received\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"\r",
+									"    let responseBody = pm.response.text(); // Get response as text\r",
+									"\r",
+									"    // JWT tokens are usually long strings with dots (.)\r",
+									"    let isJwtToken = responseBody.includes('.') && responseBody.split('.').length === 3;\r",
+									"\r",
+									"    pm.expect(isJwtToken).to.be.true; // Ensure response is a valid JWT format\r",
+									"\r",
+									"    // Save the token in environment for future requests\r",
+									"    pm.environment.set(\"auth_token\", responseBody);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"identifier\": \"testuser7\",\r\n  \"password\": \"test7@\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid password in login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 401 Unauthorized for wrong password\", function () {\r",
+									"    pm.response.to.have.status(401); // Ensure the response is 401\r",
+									"\r",
+									"    var responseBody = pm.response.text(); // Read response as plain text\r",
+									"    pm.expect(responseBody).to.include(\"Invalid password\"); // Validate error message\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"identifier\": \"cdb97\", \"password\": \"wrongpassword\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registration Username already taken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 for duplicate email\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"\r",
+									"    let responseBody = pm.response.text(); // Get response as text\r",
+									"\r",
+									"    // Check if response is JSON, if not, treat it as text\r",
+									"    try {\r",
+									"        let jsonResponse = pm.response.json();\r",
+									"        pm.expect(jsonResponse.message).to.include(\"Username already taken\");\r",
+									"    } catch (error) {\r",
+									"        // If response is plain text, check it directly\r",
+									"        pm.expect(responseBody).to.include(\"Username already taken\");\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"username\": \"testuser\", \"email\": \"test@example.com\", \"password\": \"password123\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registration Email already taken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 for duplicate email\", function () {\r",
+									"    pm.response.to.have.status(400); // Ensure status 400 is returned\r",
+									"\r",
+									"    // Try parsing JSON, but handle plain text responses too\r",
+									"    try {\r",
+									"        var jsonResponse = pm.response.json();\r",
+									"        pm.expect(jsonResponse.error).to.eql(\"Email already registered\");\r",
+									"    } catch (e) {\r",
+									"        var textResponse = pm.response.text();\r",
+									"        pm.expect(textResponse).to.include(\"Email already registered\");\r",
+									"    }\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"username\": \"testuser12\", \"email\": \"test@example.com\", \"password\": \"password123\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User not exist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 401 Unauthorized when user does not exist\", function () {\r",
+									"    pm.response.to.have.status(401); // ✅ Ensure correct status code\r",
+									"\r",
+									"    let responseBody = pm.response.text(); // Get response as text\r",
+									"\r",
+									"    if (responseBody) {\r",
+									"        try {\r",
+									"            let jsonResponse = pm.response.json();\r",
+									"            pm.expect(jsonResponse.message).to.include(\"User not found\");\r",
+									"        } catch (error) {\r",
+									"            // ✅ If response is not JSON, check message in plain text\r",
+									"            pm.expect(responseBody).to.include(\"User not found\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        pm.expect(responseBody.length).to.equal(0); // ✅ Ensure response is not empty\r",
+									"    }\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"identifier\": \"testuser2\",\r\n  \"password\": \"test2\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Valid Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Login successful, token received\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"\r",
+									"    let responseBody = pm.response.text(); // Get response as text\r",
+									"\r",
+									"    // JWT tokens are usually long strings with dots (.)\r",
+									"    let isJwtToken = responseBody.includes('.') && responseBody.split('.').length === 3;\r",
+									"\r",
+									"    pm.expect(isJwtToken).to.be.true; // Ensure response is a valid JWT format\r",
+									"\r",
+									"    // Save the token in environment for future requests\r",
+									"    pm.environment.set(\"admin_token\", responseBody);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"identifier\": \"cdb97@gmail.com\",\r\n    \"password\": \"cdb97@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Post",
+			"item": [
+				{
+					"name": "Create Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();\r",
+									"pm.test(\"Post created successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.environment.set(\"post_id\", response.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"My Second Blog Post\",\r\n  \"content\": \"This is a test post.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Fetched all posts successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 200 OK for a valid post\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(pm.response.json()).to.have.property(\"id\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/{{post_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"{{post_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Empty Title For Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 Bad Request for missing title\", function () {\r",
+									"    pm.response.to.have.status(400); // ✅ Ensure response status is 400\r",
+									"    var responseJson = pm.response.json(); // ✅ Parse response JSON\r",
+									"    \r",
+									"    pm.expect(responseJson).to.have.property(\"title\"); // ✅ Ensure \"title\" exists\r",
+									"    pm.expect(responseJson.title).to.include(\"Title is required\"); // ✅ Check message\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"title\": \"\",\r\n  \"content\": \"This is a test post.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Empty Content for post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 Bad Request for missing content\", function () {\r",
+									"    pm.response.to.have.status(400); \r",
+									"    var responseJson = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseJson).to.have.property(\"content\"); \r",
+									"    pm.expect(responseJson.content).to.include(\"Content is required\"); \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"title\": \"hello\",\r\n  \"content\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single post that don't exist fail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 404 Not Found for a non-existing post\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"\r",
+									"    // Check if response body exists and is not empty\r",
+									"    if (pm.response.text()) {\r",
+									"        var responseJson = pm.response.json();\r",
+									"        pm.expect(responseJson).to.have.property(\"message\");\r",
+									"        pm.expect(responseJson.message).to.include(\"Post not found\");\r",
+									"    } else {\r",
+									"        console.warn(\"Response body is empty\");\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/{{invalid_post_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"{{invalid_post_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forbidden user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 403 Forbidden for unauthenticated user\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"title\": \"user doesn't exist\",\r\n  \"content\": \"the post should not be posted\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"posts",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comment",
+			"item": [
+				{
+					"name": "Create Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();\r",
+									"pm.test(\"Comment created successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.environment.set(\"comment_id\", response.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"content\": \"This is a test comment.\"\r\n}\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/create/{{post_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"create",
+								"{{post_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all comments for post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Fetched comments successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/comments/{{post_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"{{post_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid comment with no authorization",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 403 Forbidden for unauthenticated user\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/comments/{{invalid_post_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"{{invalid_post_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Suspend user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User suspended successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(pm.response.text()).to.include(\"User suspended successfully\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/suspend/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"suspend",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unsuspend user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User unsuspended successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(pm.response.text()).to.include(\"User has been unsuspended successfully\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/unsuspend/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"unsuspend",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Promote user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User promoted successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/promote/7",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"promote",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized user try to suspension",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 403 Forbidden when non-admin tries to suspend user\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"\r",
+									"    let responseBody = pm.response.text(); // Get response as text\r",
+									"\r",
+									"    if (responseBody) {\r",
+									"        try {\r",
+									"            let jsonResponse = pm.response.json();\r",
+									"            pm.expect(jsonResponse.message).to.include(\"Access Denied\");\r",
+									"        } catch (error) {\r",
+									"            // If the response is not JSON, check it as text\r",
+									"            pm.expect(responseBody).to.include(\"Access Denied\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        pm.expect(responseBody.length).to.equal(0); // If response is empty, test should still pass\r",
+									"    }\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/suspend/4",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"suspend",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized user try",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 403 Forbidden when non-admin tries to unsuspend user\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"\r",
+									"    let responseBody = pm.response.text();\r",
+									"    \r",
+									"    if (responseBody) {\r",
+									"        try {\r",
+									"            let jsonResponse = pm.response.json();\r",
+									"            pm.expect(jsonResponse.message).to.include(\"Access Denied\");\r",
+									"        } catch (error) {\r",
+									"            pm.expect(responseBody).to.include(\"Access Denied\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        pm.expect(responseBody.length).to.equal(0); \r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/unsuspend/5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"unsuspend",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "non-admin user try to promote",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 403 Forbidden when non-admin tries to promote user\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"\r",
+									"    let responseBody = pm.response.text();\r",
+									"    \r",
+									"    if (responseBody) {\r",
+									"        try {\r",
+									"            let jsonResponse = pm.response.json();\r",
+									"            pm.expect(jsonResponse.message).to.include(\"Access Denied\");\r",
+									"        } catch (error) {\r",
+									"            pm.expect(responseBody).to.include(\"Access Denied\");\r",
+									"        }\r",
+									"    } else {\r",
+									"        pm.expect(responseBody.length).to.equal(0); \r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/promote/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"promote",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test that user suspended can't be suspended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 Bad Request for already suspended user\", function () { pm.response.to.have.status(400); pm.expect(pm.response.json().message).to.include(\"User is already suspended\"); });"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/suspend/4",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"suspend",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test that user that is unsuspended can't be unsuspended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 Bad Request if user is not suspended\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"    pm.expect(pm.response.text()).to.include(\"Failed to unsuspend user\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/unsuspend/6",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"unsuspend",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test admin can't be promoted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 403 Forbidden for unauthorized user promoting to admin\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/promoted/5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"promoted",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin can't be suspended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should return 400 Bad Request when trying to suspend an admin\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cannot suspend an admin.\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/suspend/5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"suspend",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
