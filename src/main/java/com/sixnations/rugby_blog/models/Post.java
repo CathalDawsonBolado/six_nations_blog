@@ -1,9 +1,9 @@
 package com.sixnations.rugby_blog.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,11 +13,12 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(nullable = false)
+    @NotBlank(message = "Title is required") 
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @NotBlank(message = "Content is required")
     private String content;
 
     @ManyToOne
@@ -26,13 +27,6 @@ public class Post {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToMany
-    @JoinTable(
-        name = "post_likes",
-        joinColumns = @JoinColumn(name = "post_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> likedUsers = new HashSet<>();
 
     public Post() {}
 
@@ -80,7 +74,6 @@ public class Post {
         this.createdAt = createdAt;
     }
 
-    // ✅ NEW: Expose username directly in JSON response
     @JsonProperty("username")
     public String getUsername() {
         return user != null ? user.getUsername() : "Unknown";

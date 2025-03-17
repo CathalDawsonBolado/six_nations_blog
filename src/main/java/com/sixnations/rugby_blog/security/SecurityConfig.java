@@ -31,19 +31,16 @@ public class SecurityConfig {
                 .requestMatchers("/admin-dashboard.css", "/admin-dashboard.js", "/admin-dashboard.html").permitAll()
                 .requestMatchers("/images/SixNationsTrophy.PNG").permitAll()
                 .requestMatchers("/images/TripleCrown.PNG").permitAll()
+                .requestMatchers("/images/RugbyBall.png").permitAll()
 
                 
-                .requestMatchers(HttpMethod.POST, "/api/likes/post/**").hasAnyAuthority("USER", "ADMIN")  
-                .requestMatchers(HttpMethod.POST, "/api/likes/comment/**").hasAnyAuthority("USER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/likes/**").hasAnyAuthority("USER")  
-
+                
                 
                 .requestMatchers(HttpMethod.POST, "/api/comments/create/**").hasAnyAuthority("USER", "ADMIN")
 
                 // ✅ Ensure posting works
                 .requestMatchers(HttpMethod.POST, "/api/posts/create").hasAnyAuthority("USER", "ADMIN") 
-                .requestMatchers(HttpMethod.DELETE, "/api/posts/delete/**").hasAnyAuthority("USER", "ADMIN")
-
+               
                 // ✅ Admin routes
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 

@@ -1,6 +1,6 @@
 package com.sixnations.rugby_blog.services;
 
-import com.sixnations.rugby_blog.dto.RegisterRequest;
+import com.sixnations.rugby_blog.dto.RegisterDTO;
 import com.sixnations.rugby_blog.models.User;
 import com.sixnations.rugby_blog.models.User.Role;
 import com.sixnations.rugby_blog.dao.UserRepo;
@@ -19,7 +19,7 @@ public class AuthService {
     }
 
     
-    public void registerUser(RegisterRequest request) {
+    public void registerUser(RegisterDTO request) {
         if (userRepo.findByUsernameIgnoreCase(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already taken");
         }
@@ -38,7 +38,7 @@ public class AuthService {
     }
 
     
-    public String authenticateUser(RegisterRequest request) {
+    public String authenticateUser(RegisterDTO request) {
         Optional<User> userOpt = userRepo.findByUsernameIgnoreCase(request.getUsername());
 
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {

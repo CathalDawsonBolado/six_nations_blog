@@ -13,9 +13,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import jakarta.validation.Valid;
+
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -24,26 +28,40 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 public class PostController {
     private final PostService postService;
     private final UserService userService;
+   
 
     public PostController(PostService postService, UserService userService) {
         this.postService = postService;
         this.userService = userService;
+        
     }
 
     
     @GetMapping
-    public CollectionModel<EntityModel<Post>> getAllPosts() {
-        List<EntityModel<Post>> posts = postService.getAllPosts().stream()
-                .map(post -> EntityModel.of(post,
-                        linkTo(methodOn(PostController.class).getPostById(post.getId())).withSelfRel(),
-                        linkTo(methodOn(PostController.class).getAllPosts()).withRel("all-posts")
-                )).collect(Collectors.toList());
+    public CollectionModel<EntityModel<Map<String, Object>>> getAllPosts() {//get all the post
+        List<EntityModel<Map<String, Object>>> posts = postService.getAllPosts().stream()
+                .map(post -> {
+                    Map<String, Object> postData = new HashMap<>();
+                    postData.put("id", post.getId());
+                    postData.put("title", post.getTitle());
+                    postData.put("content", post.getContent());
+                    postData.put("username", post.getUser().getUsername());
+                    
+
+                    return EntityModel.of(postData,
+                            linkTo(methodOn(PostController.class).getPostById(post.getId())).withSelfRel(),
+                            linkTo(methodOn(PostController.class).getAllPosts()).withRel("all-posts")
+                    );
+                })
+                .collect(Collectors.toList());
 
         return CollectionModel.of(posts, linkTo(methodOn(PostController.class).getAllPosts()).withSelfRel());
     }
 
+
+
     
-    @GetMapping("/{postId}")
+    @GetMapping("/{postId}")//get post for particular post id
     public ResponseEntity<EntityModel<Post>> getPostById(@PathVariable Long postId) {
         Optional<Post> postOpt = postService.getPostById(postId);
         if (postOpt.isEmpty()) return ResponseEntity.status(404).build();
@@ -58,36 +76,27 @@ public class PostController {
     }
 
     
-    @GetMapping("/search")
-    public ResponseEntity<List<Post>> searchPosts(@RequestParam("query") String query) {
-        List<Post> posts = postService.searchPosts(query);
-        return ResponseEntity.ok(posts);
-    }
 
-    @PostMapping("/create")
+    @PostMapping("/create")//create post
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Post> createPost(@RequestBody Post post, Principal principal) {
+    public ResponseEntity<?> createPost(@Valid @RequestBody Post post, Principal principal) {
         if (principal == null) {
-            System.out.println("❌ ERROR: Principal is NULL - User might not be authenticated");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authenticated");
         }
 
-       
         Optional<User> optionalUser = userService.findByUsername(principal.getName());
         if (optionalUser.isEmpty()) {
-            System.out.println("❌ ERROR: User not found for username: " + principal.getName());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); 
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
         }
 
-        // ✅ Assign the user to the post before saving
+        //  Assign the user to the post before saving
         User user = optionalUser.get();
         post.setUser(user);
-        System.out.println("✅ User: " + user.getUsername() + " is creating a post");
 
+        //  Save the post
         Post savedPost = postService.createPost(post);
         return ResponseEntity.ok(savedPost);
     }
-
 
 
 }

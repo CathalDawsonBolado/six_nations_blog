@@ -10,7 +10,9 @@ import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
     
-    private final User user;
+    
+	private static final long serialVersionUID = 1L;
+	private final User user;
 
     public CustomUserDetails(User user) {
         this.user = user;
@@ -28,7 +30,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername(); // Or use user.getUsername() if preferred
+        return user.getUsername(); 
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.sixnations.rugby_blog.controller;
 
 import com.sixnations.rugby_blog.dto.LoginDTO;
-import com.sixnations.rugby_blog.dto.RegisterRequest;
+import com.sixnations.rugby_blog.dto.RegisterDTO;
 import com.sixnations.rugby_blog.security.CustomAuthenticationManager;
 import com.sixnations.rugby_blog.security.CustomPasswordEncoder;
 import com.sixnations.rugby_blog.security.CustomUserDetails;
@@ -35,7 +35,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/login")//one endpoint for login
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -61,8 +61,8 @@ public class AuthController {
             return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
         }
     }
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
+    @PostMapping("/register")//One endpoint for registration
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterDTO request) {
         try {
             authService.registerUser(request);
             return ResponseEntity.ok("User registered successfully.");

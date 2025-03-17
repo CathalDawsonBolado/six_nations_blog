@@ -24,12 +24,12 @@ public class CommentService {
         this.userRepo = userRepo;
     }
 
-    // ✅ Get comments for a post
+    //  Get comments for a post
     public List<Comment> getCommentsByPost(Long postId) {
         Optional<Post> postOpt = postRepo.findById(postId);
         
         if (postOpt.isEmpty()) {
-            System.out.println("❌ ERROR: Post ID " + postId + " not found.");
+           
             return List.of(); // Return empty list instead of null
         }
         

@@ -19,7 +19,7 @@ $(document).ready(function () {
     $("#username").text(username);
 
     if (role !== "ADMIN") {
-        $("#loadAdminDashboard").hide(); // Hide Admin Dashboard Button for Users
+        $("#loadAdminDashboard").hide(); 
     }
 
     function showConfirmDialog(message, callback) {
@@ -44,44 +44,40 @@ $(document).ready(function () {
 	        type: "GET",
 	        url: "/api/posts",
 	        headers: { 
-	            "Authorization": "Bearer " + token,
+	            "Authorization": "Bearer " + localStorage.getItem("jwtToken"),
 	            "Content-Type": "application/json"
 	        },
 	        success: function (response) {
 	            $("#loadingPosts").hide();
-	            console.log("API response for posts:", response);
+	            console.log("✅ API response for posts:", response);
 
-	            // ✅ Fix: Ensure response structure is correct
-	            let posts = response._embedded?.postList || []; // Default to empty array if undefined
+	            let posts = response._embedded?.hashMapList ?? [];
 
 	            if (!Array.isArray(posts)) {
-	                console.error("Unexpected API response. Expected an array but got:", response);
-	                alert("Error: Unexpected API response.");
+	                console.error("❌ Unexpected API response:", response);
+	                alert("Error: Unexpected API response format.");
 	                return;
 	            }
 
-	            // ✅ Clear previous posts before rendering new ones
 	            $("#postsContainer").empty();
 
-	            // ✅ Show message when there are no posts
 	            if (posts.length === 0) {
-	                $("#postsContainer").html("<p>No posts available.</p>");
-	                return;
+	                $("#postsContainer").html("<p id='noPostsMessage'>No posts available.</p>");
+	            } else {
+	                $("#noPostsMessage").remove();
 	            }
+
+	            
 
 	            let postHtml = "";
 	            posts.forEach(post => {
+	               
+
 	                postHtml += `
 	                    <div class="post">
-	                        <h5>${post.title}</h5>
-	                        <p><strong>Posted by: ${post.username}</strong></p>
+	                        <h5><strong>${post.title}</strong></h5>
 	                        <p>${post.content}</p>
-	                        <button class="btn btn-blue like-button ${post.liked ? 'liked' : ''}" 
-	                                data-id="${post.id}" 
-	                                data-likeId="${post.likeId || ''}">
-	                            ${post.liked ? `❤️ Liked (${post.likesCount || 0})` : `👍 Like (${post.likesCount || 0})`}
-	                        </button>
-	                        ${role === "ADMIN" ? `<button class="btn btn-danger delete-button" data-id="${post.id}">Delete</button>` : ""}
+	                        <p>Posted by: ${post.username}</p>
 	                        <div class="comment-section" id="comments-${post.id}">
 	                            <input type="text" class="form-control comment-input" data-id="${post.id}" placeholder="Write a comment...">
 	                            <button class="btn btn-green comment-button" data-id="${post.id}">Comment</button>
@@ -92,183 +88,114 @@ $(document).ready(function () {
 	            });
 
 	            $("#postsContainer").html(postHtml);
-	            fetchComments(); // ✅ Load comments for new posts
 	        },
 	        error: function (xhr) {
 	            $("#loadingPosts").hide();
-	            console.error("Error fetching posts:", xhr);
-	            alert("Failed to load posts. Check console for details.");
+	            console.error("❌ Error fetching posts:", xhr);
+	            alert("Failed to load posts.");
 	        }
 	    });
 	}
-	function createPost() {
-	        let title = $("#postTitle").val().trim();
-	        let content = $("#postContent").val().trim();
-	        
-	        if (!title || !content) {
-	            alert("Title and content cannot be empty.");
-	            return;
-	        }
-			console.log("⏳ Sending post request:", title);
 
-	        $.ajax({
-	            type: "POST",
-	            url: "/api/posts/create",
-	            headers: { 
-	                "Authorization": "Bearer " + token,
-	                "Content-Type": "application/json"
-	            },
-	            data: JSON.stringify({ title, content }),
-	            success: function () {
-	                $("#postTitle").val("");
-	                $("#postContent").val("");
-					fetchPosts();
-	            },
-	            error: function (xhr) {
-	                console.error("Error creating post:", xhr);
-	                alert("Error creating post.");
-	            }
-	        });
-	    }
+    function fetchComments(postId) {
+        if (!postId) {
+            console.error("❌ Error: postId is undefined, cannot fetch comments.");
+            return;
+        }
 
+        console.log(`Fetching comments for post ${postId}...`);
 
-    function deletePost(postId) {
-        console.log(`Deleting post with ID: ${postId}`);
-        
         $.ajax({
-            type: "DELETE",
-            url: `/api/posts/${postId}`,
+            type: "GET",
+            url: `/api/comments/${postId}`,
             headers: { 
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json"
             },
-            success: function () {
-                fetchPosts();
+            success: function (response) {
+                let comments = response._embedded?.commentList ?? [];
+                let commentsList = $(`#comments-list-${postId}`);
+
+                commentsList.empty(); 
+
+                comments.forEach(comment => {
+                    let commentHtml = `<p><strong>${comment.user.username}:</strong> ${comment.content}</p>`;
+                    commentsList.append(commentHtml);
+                });
             },
             error: function (xhr) {
-                console.error("Error deleting post:", xhr);
-                alert("Error deleting post.");
+                console.error(`❌ Error fetching comments for post ${postId}:`, xhr);
             }
         });
     }
+	function addComment(postId, commentText) {
+		    console.log(`Adding comment to post ${postId}:`, commentText);
 
-	function toggleLike(postId, button) {
-	    let isLiked = button.hasClass("liked");
+		    $.ajax({
+		        type: "POST",
+		        url: `/api/comments/create/${postId}`,  // Ensure `postId` is in URL
+		        headers: { 
+		            "Authorization": "Bearer " + token,
+		            "Content-Type": "application/json"
+		        },
+		        data: JSON.stringify({ content: commentText }), //  Use `content`, not `text`
+		        success: function (response) {
+		            console.log("Comment added successfully:", response);
 
-	    console.log(`🔄 Toggling like for post ${postId}, isLiked: ${isLiked}`);
+		            //  Clear input field
+		            $(".comment-input[data-id='" + postId + "']").val("");
 
-	    let method = isLiked ? "DELETE" : "POST";
-	    let url = isLiked ? `/api/likes/post/${postId}` : `/api/likes/post/${postId}`; // Ensure we're using postId
-
-	    const token = localStorage.getItem("jwtToken");
-
-	    if (!token) {
-	        alert("You must be logged in to like posts.");
-	        return;
-	    }
-
-	    $.ajax({
-	        type: method,
-	        url: url,
-	        headers: {
-	            "Authorization": "Bearer " + token,
-	            "Content-Type": "application/json"
-	        },
-	        success: function (response) {
-	            console.log("✅ Server Response:", response);
-
-	            // ✅ Extract `likesCount` properly from the HATEOAS response
-	            let likesCount = response.content?.likesCount ?? response.likesCount ?? 0;
-
-	            if (likesCount === undefined) {
-	                console.error("❌ Error: likesCount is missing in response", response);
-	                alert("Error retrieving like count.");
-	                return;
-	            }
-
-	            console.log(`✅ Updated likes for post ${postId}: ${likesCount}`);
-
-	            if (method === "POST") {
-	                button.addClass("liked");
-	                button.html(`❤️ Liked (${likesCount})`);
-	            } else {
-	                button.removeClass("liked");
-	                button.html(`👍 Like (${likesCount})`);
-	            }
-	        },
-	        error: function (xhr) {
-	            console.error("❌ Error toggling like:", xhr);
-	            alert("Error toggling like. Please check your authentication.");
-	        }
-	    });
-	}
+		            //  Fetch all comments again
+		            fetchComments(postId);
+		        },
+		        error: function (xhr) {
+		            console.error("❌ Error adding comment:", xhr);
+		            alert("Failed to add comment. Check console for details.");
+		        }
+		    });
+		}
 
 
-    function addComment(postId, commentText) {
-        console.log(`Adding comment to post ${postId}: ${commentText}`);
+
+    function createPost() {
+        let title = $("#postTitle").val().trim();
+        let content = $("#postContent").val().trim();
+
+        if (!title || !content) {
+            alert("Title and content cannot be empty.");
+            return;
+        }
+
+        $("#createPostButton").prop("disabled", true);
 
         $.ajax({
             type: "POST",
-            url: `/api/comments/create/${postId}`,
+            url: "/api/posts/create",
             headers: { 
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json"
             },
-            data: JSON.stringify({ content: commentText }),
-            success: function () {
-                $(`.comment-input[data-id='${postId}']`).val("");  
-                fetchComments();
+            data: JSON.stringify({ title, content }),
+            success: function (newPost) {
+                $("#postTitle").val("");
+                $("#postContent").val("");
+                $("#createPostButton").prop("disabled", false);
+
+                fetchPosts();
             },
             error: function (xhr) {
-                console.error("Error adding comment:", xhr);
-                alert("Failed to add comment.");
+                console.error("Error creating post:", xhr);
+                alert("Error creating post.");
+                $("#createPostButton").prop("disabled", false);
             }
         });
     }
 
-    function fetchComments() {
-        console.log("Fetching comments...");
-
-        $(".comments-list").empty(); 
-
-        $(".post").each(function () {
-            let postId = $(this).find(".comment-input").data("id");
-
-            $.ajax({
-                type: "GET",
-                url: `/api/comments/${postId}`,  
-                headers: { 
-                    "Authorization": "Bearer " + token,
-                    "Content-Type": "application/json"
-                },
-                success: function (response) {
-                    let comments = response._embedded?.commentList;
-
-                    if (!Array.isArray(comments)) {
-                        console.error("Unexpected API response for comments:", response);
-                        return;
-                    }
-
-                    let commentsContainer = $(`#comments-list-${postId}`);
-                    commentsContainer.empty();
-
-                    comments.forEach(comment => {
-                        let commentHtml = `<p><strong>${comment.user.username}:</strong> ${comment.content}</p>`;
-                        commentsContainer.append(commentHtml);
-                    });
-                },
-                error: function (xhr) {
-                    console.error(`Error fetching comments for post ${postId}:`, xhr);
-                }
-            });
-        });
-    }
-
-    $(document).on("click", ".like-button", function () {
+    $(document).off("click", ".like-button").on("click", ".like-button", function () {
         toggleLike($(this).data("id"), $(this));
     });
 
-    $(document).on("click", ".comment-button", function () {
+    $(document).off("click", ".comment-button").on("click", ".comment-button", function () {
         let postId = $(this).data("id");
         let commentText = $(`.comment-input[data-id='${postId}']`).val().trim();
         
@@ -280,14 +207,12 @@ $(document).ready(function () {
         addComment(postId, commentText);
     });
 
-    $(document).on("click", ".delete-button", function () {
-        showConfirmDialog("Are you sure you want to delete this post?", () => deletePost($(this).data("id")));
-    });
-
-    $("#createPostButton").click(createPost);
+    $("#createPostButton").off("click").on("click", createPost);
 
     fetchPosts();
 });
+
+
 
 
 

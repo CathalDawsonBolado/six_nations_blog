@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 		    .map(role -> new SimpleGrantedAuthority(role.replace("ROLE_", ""))) 
                 		    .collect(Collectors.toList());
 
-                		System.out.println("✅ Final Spring Security Authorities: " + authorities);
+                		System.out.println("Final Spring Security Authorities: " + authorities);
 
 
                     UsernamePasswordAuthenticationToken authToken =
@@ -67,5 +67,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-}
-
+} 

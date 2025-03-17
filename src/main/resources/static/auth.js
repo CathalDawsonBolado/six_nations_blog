@@ -74,7 +74,7 @@ $(document).ready(function () {
         });
     });
 
-    // ✅ Handle Registration
+    //  Handle Registration
     $("#registerForm").submit(function (event) {
         event.preventDefault();
 
@@ -101,13 +101,13 @@ $(document).ready(function () {
         });
     });
 
-    // ✅ Handle Logout
+    // Handle Logout
     $("#logoutBtn").click(function () {
         localStorage.removeItem("jwtToken");
         window.location.href = "index.html";
     });
 
-    // ✅ Protect Pages
+    //  Protect Pages
     function requireAuth() {
         if (!isLoggedIn()) {
             alert("You must be logged in!");

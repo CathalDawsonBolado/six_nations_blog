@@ -5,8 +5,7 @@ import com.sixnations.rugby_blog.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,9 +32,4 @@ public class UserController {
     }
 
     
-    @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam("query") String query) {
-        List<User> users = userService.searchUsers(query);
-        return ResponseEntity.ok(users);
-    }
 }

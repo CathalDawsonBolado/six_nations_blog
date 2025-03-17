@@ -66,30 +66,6 @@ $(document).ready(function () {
         });
     });
 
-    $("#loginForm").submit(function (event) {
-        event.preventDefault();
-        let loginData = {
-            identifier: $("#loginIdentifier").val(),
-            password: $("#loginPassword").val()
-        };
-
-        $.ajax({
-            type: "POST",
-            url: "/api/auth/login",
-            contentType: "application/json",
-            data: JSON.stringify(loginData),
-            success: function (response) {
-                localStorage.setItem("jwtToken", response);
-                showDashboard();
-                let userRole = getUserRoleFromToken(response);
-                loadContentInto(userRole === "ADMIN" ? "admin-dashboard.html" : "user-dashboard.html");
-            },
-            error: function (xhr) {
-                alert("Login failed: " + xhr.responseText);
-            }
-        });
-    });
-
     $("#registerForm").submit(function (event) {
         event.preventDefault();
 
@@ -120,10 +96,10 @@ $(document).ready(function () {
         });
     });
 
-    $("#logoutBtn").click(function () {
-        localStorage.removeItem("jwtToken");
-        window.location.href = "index.html";
-    });
+	$("#logoutBtn").off("click").on("click", function () {
+	    localStorage.removeItem("jwtToken");
+	    window.location.href = "index.html";
+	});
 
     $("#showRegister").click(function () {
         $("#loginPage").hide();

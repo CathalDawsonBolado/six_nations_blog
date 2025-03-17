@@ -77,8 +77,8 @@ $(document).ready(function () {
                 alert("User suspended successfully.");
                 loadUsers();
             },
-            error: function () {
-                alert("Error suspending user.");
+            error: function (xhr) {
+                alert(xhr.responseText);
             }
         });
     };
@@ -100,7 +100,7 @@ $(document).ready(function () {
 
    
 
-    console.log("✅ admin-dashboard.js loaded successfully! All functions are now globally available.");
+    console.log(" admin-dashboard.js loaded successfully! All functions are now globally available.");
 
     loadUsers();
 });
