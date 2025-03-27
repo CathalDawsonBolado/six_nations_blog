@@ -2,6 +2,7 @@ package com.sixnations.rugby_blog.controller;
 
 import com.sixnations.rugby_blog.models.Post;
 import com.sixnations.rugby_blog.models.User;
+import com.sixnations.rugby_blog.security.CustomUserDetails;
 import com.sixnations.rugby_blog.services.PostService;
 import com.sixnations.rugby_blog.services.UserService;
 
@@ -10,6 +11,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -75,19 +78,18 @@ public class PostController {
         return ResponseEntity.ok(postResource);
     }
 
-    
-
     @PostMapping("/create")//create post
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<?> createPost(@Valid @RequestBody Post post, Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authenticated");
-        }
+    public ResponseEntity<?> createPost(@Valid @RequestBody Post post, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    	if (userDetails == null) {
+    	    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authenticated");
+    	}
 
-        Optional<User> optionalUser = userService.findByUsername(principal.getName());
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
-        }
+    	Optional<User> optionalUser = userService.findByUsername(userDetails.getUsername());
+    	if (optionalUser.isEmpty()) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+    	}
+
 
         //  Assign the user to the post before saving
         User user = optionalUser.get();

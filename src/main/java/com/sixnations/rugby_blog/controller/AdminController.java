@@ -61,7 +61,7 @@ public class AdminController {
     	if(isUnsuspended) {
     		return ResponseEntity.ok("User has been unsuspended successfully");
     	}else {
-    		return ResponseEntity.status(400).body("Failed to unsuspend user. User must not success");
+    		return ResponseEntity.status(400).body("Failed to unsuspend user. User is not suspended");
     	}
     }
 

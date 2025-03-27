@@ -43,11 +43,9 @@ public class CommentService {
 
     
     public Comment createComment(Long postId, String content, String username) throws AccessDeniedException {
-        System.out.println("📢 Checking if post exists for ID: " + postId);
         Optional<Post> postOpt = postRepo.findById(postId);
         
         if (postOpt.isEmpty()) {
-            System.out.println("❌ ERROR: Post not found with ID: " + postId);
             throw new IllegalArgumentException("Post not found.");
         }
 
@@ -62,46 +60,16 @@ public class CommentService {
         
         User user = userOpt.get();
         if (user.isSuspended()) {
-            System.out.println("❌ ERROR: User " + username + " is suspended and cannot comment.");
+            
             throw new AccessDeniedException("User is suspended and cannot comment.");
         }
 
         
         Comment comment = new Comment(content, postOpt.get(), user);
         Comment savedComment = commentRepo.save(comment);
-        System.out.println("✅ Comment successfully created with ID: " + savedComment.getId());
+        
 
         return savedComment;
-    }
-
-   
-    public boolean deleteComment(Long commentId, String username) throws AccessDeniedException {
-        System.out.println("📢 Attempting to delete comment with ID: " + commentId);
-        Optional<Comment> commentOpt = commentRepo.findById(commentId);
-        
-        if (commentOpt.isEmpty()) {
-            System.out.println("❌ ERROR: Comment ID " + commentId + " not found.");
-            return false; // Comment not found
-        }
-
-        Comment comment = commentOpt.get();
-        User author = comment.getUser();
-        Optional<User> userOpt = userRepo.findByUsernameIgnoreCase(username);
-
-        if (userOpt.isEmpty()) {
-            System.out.println("❌ ERROR: User " + username + " not found.");
-            return false;
-        }
-
-        User user = userOpt.get();
-        if (user.equals(author) || user.getRole() == User.Role.ADMIN) {
-            commentRepo.deleteById(commentId);
-            System.out.println("✅ Comment ID " + commentId + " deleted successfully.");
-            return true;
-        }
-
-        System.out.println("❌ ERROR: User " + username + " is not allowed to delete comment ID " + commentId);
-        throw new AccessDeniedException("You are not allowed to delete this comment!");
     }
 }
 

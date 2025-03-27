@@ -15,6 +15,7 @@ public class CustomUserDetails implements UserDetails {
 	private final User user;
 
     public CustomUserDetails(User user) {
+    	 System.out.println("💡 CustomUserDetails constructor called with user: " + user);
         this.user = user;
     }
 
@@ -30,6 +31,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
+    	System.out.println("💥 Calling getUsername() on user: " + user);
         return user.getUsername(); 
     }
 
