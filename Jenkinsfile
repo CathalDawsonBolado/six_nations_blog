@@ -28,7 +28,7 @@ pipeline {
             }
         }
  
-        sstage('SonarQube Analysis') {
+stage('SonarQube Analysis') {
     steps {
         dir('') {
             bat '''
@@ -43,7 +43,3 @@ pipeline {
     }
 }
 
-        }
-
-        }
-    }
