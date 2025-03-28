@@ -35,7 +35,7 @@ pipeline {
                         mvn clean verify sonar:sonar \
                         -Dsonar.projectKey=rugby_blog \
                         -Dsonar.projectName="rugby_blog" \
-                        -Dsonar.host.url=http://sonarqube:9000 \
+                        -Dsonar.host.url=http://localhost:9000
                         -Dsonar.token=${SONAR_TOKEN}
                     '''
                 }
