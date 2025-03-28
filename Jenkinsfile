@@ -1,17 +1,17 @@
 pipeline {
     agent any
- 
+
     environment {
         SONAR_TOKEN = credentials('sonar-token') // Matches Jenkins credentials ID
     }
- 
+
     stages {
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/CathalDawsonBolado/six_nations_blog.git', branch: 'feature/testing'
             }
         }
- 
+
         stage('Build') {
             steps {
                 dir('') {
@@ -19,7 +19,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Test') {
             steps {
                 dir('') {
@@ -27,19 +27,22 @@ pipeline {
                 }
             }
         }
- 
-stage('SonarQube Analysis') {
-    steps {
-        dir('') {
-            bat '''
-                mvn clean verify sonar:sonar ^
-                -Dsonar.projectKey=rugby_blog ^
-                -Dsonar.projectName="rugby_blog" ^
-                -Dsonar.coverage.jacoco.xmlReportPaths=target\\jacoco-report-merged\\jacoco.xml ^
-                -Dsonar.host.url=http://localhost:9000 ^
-                -Dsonar.token=%SONAR_TOKEN%
-            '''
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('') {
+                    bat '''
+                        mvn clean verify sonar:sonar ^
+                        -Dsonar.projectKey=rugby_blog ^
+                        -Dsonar.projectName="rugby_blog" ^
+                        -Dsonar.coverage.jacoco.xmlReportPaths=target\\jacoco-report-merged\\jacoco.xml ^
+                        -Dsonar.host.url=http://localhost:9000 ^
+                        -Dsonar.token=%SONAR_TOKEN%
+                    '''
+                }
+            }
         }
     }
 }
+
 
