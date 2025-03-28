@@ -124,12 +124,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Your Other Project Dependencies -->
-        <dependency>
-            <groupId>com.ericsson</groupId>
-            <artifactId>network-event-app</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
