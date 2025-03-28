@@ -28,18 +28,21 @@ pipeline {
             }
         }
  
-        stage('SonarQube Analysis') {
-            steps {
-                dir('') {
-                    bat '''
-                        mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=rugby_blog \
-                        -Dsonar.projectName="rugby_blog" \
-                        -Dsonar.host.url=http://localhost:9000
-                        -Dsonar.token=${SONAR_TOKEN}
-                    '''
-                }
-            }
+        sstage('SonarQube Analysis') {
+    steps {
+        dir('') {
+            bat '''
+                mvn clean verify sonar:sonar ^
+                -Dsonar.projectKey=rugby_blog ^
+                -Dsonar.projectName="rugby_blog" ^
+                -Dsonar.coverage.jacoco.xmlReportPaths=target\\jacoco-report-merged\\jacoco.xml ^
+                -Dsonar.host.url=http://localhost:9000 ^
+                -Dsonar.token=%SONAR_TOKEN%
+            '''
+        }
+    }
+}
+
         }
 
         }
