@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonar-token')              // SonarQube token
-        DOCKER_CREDENTIALS = credentials('dockerhub-creds')   // Replace with your DockerHub Jenkins credentials ID
+        DOCKER_CREDENTIALS = credentials('dockerhub-credentials')   // Replace with your DockerHub Jenkins credentials ID
         IMAGE_NAME = 'cdb97/rugby-blog'                       // Your DockerHub repo name
     }
 
