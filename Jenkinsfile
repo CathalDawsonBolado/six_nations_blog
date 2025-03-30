@@ -2,7 +2,9 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonar-token') // Matches Jenkins credentials ID
+        SONAR_TOKEN = credentials('sonar-token')              // SonarQube token
+        DOCKER_CREDENTIALS = credentials('dockerhub-creds')   // Replace with your DockerHub Jenkins credentials ID
+        IMAGE_NAME = 'cdb97/rugby-blog'                       // Your DockerHub repo name
     }
 
     stages {
@@ -14,17 +16,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                dir('') {
-                    bat 'mvn clean install -DskipTests'
-                }
+                bat 'mvn clean install -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
-                dir('') {
-                    bat 'mvn test'
-                }
+                bat 'mvn test'
             }
         }
 
@@ -36,16 +34,39 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                dir('') {
-                    bat '''
-                        mvn clean verify sonar:sonar ^
-                        -Dsonar.projectKey=rugby_blog ^
-                        -Dsonar.projectName="rugby_blog" ^
-                        -Dsonar.coverage.jacoco.xmlReportPaths=target\\jacoco-report-merged\\jacoco.xml ^
-                        -Dsonar.host.url=http://localhost:9000 ^
-                        -Dsonar.token=%SONAR_TOKEN%
-                    '''
-                }
+                bat '''
+                    mvn clean verify sonar:sonar ^
+                    -Dsonar.projectKey=rugby_blog ^
+                    -Dsonar.projectName="rugby_blog" ^
+                    -Dsonar.coverage.jacoco.xmlReportPaths=target\\jacoco-report-merged\\jacoco.xml ^
+                    -Dsonar.host.url=http://localhost:9000 ^
+                    -Dsonar.token=%SONAR_TOKEN%
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat "docker build -t %IMAGE_NAME% ."
+            }
+        }
+
+        stage('Push Docker Image to DockerHub') {
+            steps {
+                bat '''
+                    docker login -u %DOCKER_CREDENTIALS_USR% -p %DOCKER_CREDENTIALS_PSW%
+                    docker push %IMAGE_NAME%
+                '''
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                bat '''
+                    docker stop rugby-blog || echo "No container to stop"
+                    docker rm rugby-blog || echo "No container to remove"
+                    docker run -d -p 8081:8081 --name rugby-blog %IMAGE_NAME%
+                '''
             }
         }
     }
@@ -56,6 +77,7 @@ pipeline {
         }
     }
 }
+
 
 
 
