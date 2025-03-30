@@ -1,8 +1,36 @@
-stage('Package') {
+pipeline {
+    agent any
+
+    environment {
+        SONAR_TOKEN = credentials('sonar-token') // Matches Jenkins credentials ID
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/CathalDawsonBolado/six_nations_blog.git', branch: 'feature/testing'
+            }
+        }
+
+        stage('Build') {
             steps {
                 dir('') {
-                    bat 'mvn package -DskipTests'
+                    bat 'mvn clean install -DskipTests'
                 }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('') {
+                    bat 'mvn test'
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn package -DskipTests'
             }
         }
 
@@ -10,7 +38,7 @@ stage('Package') {
             steps {
                 dir('') {
                     bat '''
-                        mvn verify sonar:sonar ^
+                        mvn clean verify sonar:sonar ^
                         -Dsonar.projectKey=rugby_blog ^
                         -Dsonar.projectName="rugby_blog" ^
                         -Dsonar.coverage.jacoco.xmlReportPaths=target\\jacoco-report-merged\\jacoco.xml ^
@@ -28,5 +56,6 @@ stage('Package') {
         }
     }
 }
+
 
 
