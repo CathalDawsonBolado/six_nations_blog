@@ -12,4 +12,4 @@ USE rugbyblog_db;
 UPDATE users
 SET role = 'admin'
 WHERE username = 'your_registered_username';
-hello to this project hello
+hello to this project hello world
