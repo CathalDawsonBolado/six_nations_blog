@@ -54,6 +54,9 @@ pipeline {
         success {
             archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
         }
+        always {
+            junit 'target/surefire-reports/*.xml'
+        }
     }
 }
 
