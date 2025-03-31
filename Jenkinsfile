@@ -27,6 +27,11 @@ pipeline {
                 }
             }
         }
+        stage('Code Coverage Report') {
+    steps {
+        bat 'mvn jacoco:report'
+    }
+}
 
         stage('Package') {
             steps {
